@@ -6,6 +6,7 @@ publishes to HomeAssistant's Mosquitto instance.
 from systemd.journal import JournalHandler
 from bt_proximity import BluetoothRSSI
 import paho.mqtt.client as mqtt
+import threading
 import logging
 import socket
 import json
@@ -16,7 +17,7 @@ import os
 # TODO Move to a database!!!
 BT_ADDR = 'C4:98:80:35:B6:1D'
 
-# Configure logging
+# Configure logging to journal
 log = logging.getLogger(__name__)
 
 journald_handler = JournalHandler()
@@ -69,7 +70,7 @@ def main():
         # Default "away" value
         if not btrssi.connected:
             rssi = -99
-        
+
         # Calculate the running mean
         rssi_samples[sample_num] = rssi
         sample_num = (sample_num + 1) % num_rssi_samples
