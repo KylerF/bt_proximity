@@ -1,0 +1,20 @@
+# MQTT connection parameters
+mqtt:
+    # Broker connection details
+    - url: 192.168.1.5
+    - user: user
+    - pwd: password
+    - port: 1883
+    - keepalive: 60
+
+    # This client's identifier
+    - client_id: client
+
+# RSSI averaging parameters
+rssi:
+    # Delay between measurements (seconds)
+    - delay: 0.5
+
+    # Number of RSSI values to average together
+    - samples: 10
+
