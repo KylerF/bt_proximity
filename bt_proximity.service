@@ -1,0 +1,12 @@
+[Unit]
+Description=Bluetooth Proximity Tracking
+After=bluetooth.target
+
+[Service]
+User=pi
+ExecStart=/usr/bin/python2.7 /home/pi/publish_rssi.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
