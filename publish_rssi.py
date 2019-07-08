@@ -31,7 +31,7 @@ log.setLevel(logging.DEBUG)
 def on_connect(client, userdata, flags, rc):
     log.info("Connected to HASS: flags={0}, result_code={1}, client_id={2}".format(str(flags), str(rc), client_name))
 
-# MQTT data published callback
+# MQTT disconnected callback
 def on_disconnect(client, userdata,rc=0):
     log.error("Disconnected from HASS with result code {}".format(str(rc)))
 
@@ -135,7 +135,8 @@ def main():
             if mac in macs:
                 continue
 
-            # Add the new device 
+            # Add the new device
+            log.info('Adding new device: {0} {1}'.format(mac, name))
             device_id = name.lower().replace("'", "").replace(" ", "_")
             new_device = {
                 device_id: {
