@@ -9,9 +9,7 @@ import paho.mqtt.client as mqtt
 import bluetooth
 import threading
 import logging
-import socket
 import yaml
-import json
 import time
 import sys
 import os
@@ -151,14 +149,14 @@ def main():
             devices_file.close()
 
             client_topic = '{0}/{1}/{2}'.format(topic_prefix, client_id, device_id)
-            
+ 
             args = (client, client_topic, mac, num_rssi_samples, rssi_delay)
             macs.append(mac)
 
             # Kick off a new thread
             tracking_thread = threading.Thread(target=publish_rssi, args=args)
             tracking_thread.start()
-        
+
         time.sleep(scan_delay)
 
 if __name__ == '__main__':
