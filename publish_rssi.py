@@ -437,7 +437,7 @@ def main():
                 device_id: {
                     'mac': mac, 
                     'name': name, 
-                    'track': True
+                    'track': False
                 }
             }
             
