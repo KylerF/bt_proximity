@@ -67,6 +67,7 @@ class ConfigLoader:
             self.topic_prefix = mqtt_config['topic_prefix']
 
             # Load new device scanning configuration
+            self.scan_enabled = scan_config['enabled']
             self.scan_duration = scan_config['duration']
             self.scan_delay = scan_config['delay']
 
@@ -389,6 +390,7 @@ def main():
     topic_prefix = config.topic_prefix
 
     # Load new device scanning configuration
+    scan_enabled = config.scan_enabled
     scan_duration = config.scan_duration
     scan_delay = config.scan_delay
 
@@ -419,7 +421,10 @@ def main():
     
     # Periodically scan for new devices
     while True:
-        discovered_devices = bluetooth.discover_devices(duration=scan_duration, lookup_names=True)
+        discovered_devices = []
+
+        if scan_enabled:
+            discovered_devices = bluetooth.discover_devices(duration=scan_duration, lookup_names=True)
 
         for device in discovered_devices:
             mac = device[0]
