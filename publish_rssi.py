@@ -3,7 +3,7 @@ Bluetooth device proximity tracking.
 Monitors the RSSI received from bluetooth devices and 
 publishes to HomeAssistant's Mosquitto instance.
 """
-#from systemd.journal import JournalHandler
+
 from bt_proximity import BluetoothRSSI
 import paho.mqtt.client as mqtt
 import bluetooth
@@ -24,7 +24,6 @@ log_handler.setFormatter(logging.Formatter(
 ))
 
 log.addHandler(log_handler)
-log.setLevel('DEBUG')
 
 """
 Config file loader/validator
@@ -136,6 +135,7 @@ class DeviceRegistry:
             return registry
         else:
             try:
+                registry.known_devices = {}
                 devices_file = open(registry.filename, 'r')
             
                 # Register all devices in the file
@@ -256,19 +256,15 @@ Threaded execution for tracking a single device
 and publishing results to HASS
 """
 class TrackingThread:
-    def __init__(self, device, config):
+    def __init__(self, device, config, hass_client):
         self.config = config
         self.device = device
+        self.hass_client = hass_client
 
         # Add an event to allow this thread to be stopped
         self.stop_event = threading.Event()
         
         # Extract MQTT details from config
-        self.mqtt_url = config.broker
-        self.mqtt_port = config.port
-        self.mqtt_keepalive = config.keepalive
-        self.mqtt_user = config.user
-        self.mqtt_pwd = config.pwd
         self.mqtt_client_id = config.client_id
         self.mqtt_topic_prefix = config.topic_prefix
 
@@ -299,8 +295,6 @@ class TrackingThread:
     # Start tracking the device
     def start(self):
         # Create a client connection to HASS
-        self.hass_client = HASSClient(self.mqtt_client_id)
-        self.hass_client.connect(self.mqtt_url, self.mqtt_port, self.mqtt_keepalive, self.mqtt_user, self.mqtt_pwd)
         self.mqtt_client_topic = '{0}/{1}/{2}'.format(self.mqtt_topic_prefix, self.mqtt_client_id, self.device.id)
 
         # Start the new thread
@@ -402,13 +396,14 @@ def main():
     device_registry = DeviceRegistry.load()
     known_devices = device_registry.known_devices
 
+    # Create shared client connection to HASS
+    hass_client = HASSClient(client_id)
+    hass_client.connect(broker, port, keepalive, user, pwd)
+
     # Keep a list of tracked MAC addresses
     macs = []
 
     # Start tracking known devices, if there are any
-    if not known_devices:
-        known_devices = {}
-    
     for device_id in known_devices:
         device = known_devices[device_id]
         
@@ -416,7 +411,7 @@ def main():
             continue
 
         # Kick off a new thread
-        tracking_thread = TrackingThread(device, config)
+        tracking_thread = TrackingThread(device, config, hass_client)
         tracking_thread.start()
     
     # Periodically scan for new devices
