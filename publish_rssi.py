@@ -97,15 +97,15 @@ class Device:
         self.mac = mac
         self.name = name
         self.track = track
+        self.btrssi = BluetoothRSSI(addr=mac)
 
     # Query received bluetooth power (RSSI)
     def get_rssi(self):
         # Attempt connection to device and query RSSI
-        btrssi = BluetoothRSSI(addr=self.mac)
-        rssi = btrssi.get_rssi()
+        rssi = self.btrssi.get_rssi()
 
         # Default "away" value
-        if not btrssi.connected:
+        if rssi is None:
             rssi = -99
 
         return rssi
@@ -291,6 +291,7 @@ class TrackingThread:
                 sample_num = (sample_num + 1) % self.num_rssi_samples
                 rssi = sum(rssi_samples) / self.num_rssi_samples
 
+            log.debug('{0} RSSI: {1}'.format(self.device.name, rssi))
             # Publish to HASS
             self.hass_client.publish(self.mqtt_client_topic, rssi)
             time.sleep(self.rssi_delay)
