@@ -71,6 +71,7 @@ class ConfigLoader:
             self.scan_delay = scan_config['delay']
 
             # Load RSSI configuration
+            self.use_mean = rssi_config['use_mean']
             self.num_rssi_samples = rssi_config['samples']
             self.rssi_delay = rssi_config['delay'] 
         except KeyError:
@@ -269,6 +270,7 @@ class TrackingThread:
         self.mqtt_topic_prefix = config.topic_prefix
 
         # Extract RSSI averaging params from config
+        self.use_mean = config.use_mean
         self.num_rssi_samples = config.num_rssi_samples
         self.rssi_delay = config.rssi_delay
 
@@ -283,13 +285,14 @@ class TrackingThread:
             # Attempt connection to device and query RSSI
             rssi = self.device.get_rssi()
 
-            # Calculate the running mean
-            rssi_samples[sample_num] = rssi
-            sample_num = (sample_num + 1) % self.num_rssi_samples
-            avg_rssi = sum(rssi_samples) / self.num_rssi_samples
+            if self.use_mean and rssi > -99: 
+                # Calculate the running mean
+                rssi_samples[sample_num] = rssi
+                sample_num = (sample_num + 1) % self.num_rssi_samples
+                rssi = sum(rssi_samples) / self.num_rssi_samples
 
             # Publish to HASS
-            self.hass_client.publish(self.mqtt_client_topic, avg_rssi)
+            self.hass_client.publish(self.mqtt_client_topic, rssi)
             time.sleep(self.rssi_delay)
 
     # Start tracking the device
