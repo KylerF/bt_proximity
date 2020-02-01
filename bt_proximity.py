@@ -59,4 +59,6 @@ class BluetoothRSSI(object):
             # Happens if connection fails (e.g. device is not in range)
             self.connected = False
             return None
-
+        except struct.error:
+            # Invalid RSSI value returned
+            return None
