@@ -296,7 +296,7 @@ class TrackingThread:
             avg_rssi = sum(rssi_samples) / self.num_rssi_samples
             log.debug("{0} Average: {1}".format(self.device.name, avg_rssi))
             
-            if self.use_mean and rssi > -99: 
+            if self.use_mean: 
                 # Calculate the running mean
                 rssi_samples[sample_num] = rssi
                 sample_num = (sample_num + 1) % self.num_rssi_samples
