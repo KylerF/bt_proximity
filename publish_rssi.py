@@ -106,7 +106,7 @@ class Device:
         # Default "away" value
         if not btrssi.connected:
             rssi = -99
-
+        
         return rssi
 
 """
@@ -272,6 +272,10 @@ class TrackingThread:
         self.num_rssi_samples = config.num_rssi_samples
         self.rssi_delay = config.rssi_delay
 
+        log.debug("Tracking device {0} - client_id: {1}, num_rssi_samples: {2}, rssi_delay: {3}".format(
+            self.device.name, self.mqtt_client_id, self.num_rssi_samples, self.rssi_delay        
+        ))
+
     # Keep a running average RSSI from the device and publish to HASS
     def publish_rssi(self):
         # Init RSSI samples array
@@ -282,11 +286,13 @@ class TrackingThread:
         while not self.stop_event.is_set():
             # Attempt connection to device and query RSSI
             rssi = self.device.get_rssi()
+            log.debug("{0} RSSI: {1}".format(self.device.name, rssi))
 
             # Calculate the running mean
             rssi_samples[sample_num] = rssi
             sample_num = (sample_num + 1) % self.num_rssi_samples
             avg_rssi = sum(rssi_samples) / self.num_rssi_samples
+            log.debug("{0} Average: {1}".format(self.device.name, avg_rssi))
 
             # Publish to HASS
             self.hass_client.publish(self.mqtt_client_topic, avg_rssi)
