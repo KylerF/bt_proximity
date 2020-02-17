@@ -103,10 +103,6 @@ class Device:
     def get_rssi(self):
         # Attempt connection to device and query RSSI
         rssi = self.btrssi.get_rssi()
-
-        # Default "away" value
-        if rssi is None:
-            rssi = -99
         
         return rssi
 
@@ -288,6 +284,12 @@ class TrackingThread:
         while not self.stop_event.is_set():
             # Attempt connection to device and query RSSI
             rssi = self.device.get_rssi()
+            
+            # Ignore bad readings
+            if rssi == None:
+                log.debug("Invalid RSSI value returned!")
+                continue
+
             log.debug("{0} RSSI: {1}".format(self.device.name, rssi))
 
             # Calculate the running mean
