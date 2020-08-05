@@ -1,0 +1,51 @@
+# Log level -
+# Accepted values: DEBUG, INFO, ERROR
+logger:
+    level: INFO
+
+# MQTT parameters
+mqtt:
+    # Broker connection details
+    url: 127.0.0.1
+    user: mosquitto_user
+    pwd: "secretpassword"
+    port: 1883
+    keepalive: 60
+
+    # This client's identifier
+    client_id: my_id
+
+    # First word in the topic to publish
+    # Full topic is formatted topic_prefix/client_id/[device name]
+    topic_prefix: pressence
+
+    # Delay between sending updates to server (seconds)
+    delay: 1.0
+
+# Device discovery scanning.
+# If enabled, all discovered devices will be registered
+# and tracked.
+scan:
+    # Set to false to disable
+    enabled: false
+
+    # Duration of each scan (seconds)
+    duration: 4
+
+    # Delay between scans (seconds)
+    delay: 10
+
+# RSSI averaging parameters
+rssi:
+    # Whether to use running mean
+    use_mean: True
+
+    # Maximum accepted delta between consecutive RSSI measurements
+    max_delta: 10
+
+    # Delay between measurements (seconds)
+    delay: 0.5
+
+    # Number of RSSI values to average together
+    samples: 10
+
