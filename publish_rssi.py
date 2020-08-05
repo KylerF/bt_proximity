@@ -73,6 +73,7 @@ class ConfigLoader:
             # Load RSSI configuration
             self.use_mean = rssi_config['use_mean']
             self.num_rssi_samples = rssi_config['samples']
+            self.max_delta = rssi_config['max_delta']
             self.rssi_delay = rssi_config['delay'] 
         except KeyError:
             log.error('Your configuration is incomplete!')
@@ -268,6 +269,7 @@ class TrackingThread:
         # Extract RSSI averaging params from config
         self.use_mean = config.use_mean
         self.num_rssi_samples = config.num_rssi_samples
+        self.max_delta = config.max_delta
         self.rssi_delay = config.rssi_delay
 
         log.debug("Tracking device {0} - client_id: {1}, num_rssi_samples: {2}, rssi_delay: {3}".format(
@@ -288,7 +290,8 @@ class TrackingThread:
             # Ignore bad readings
             if rssi == None:
                 log.debug("Invalid RSSI value returned!")
-                continue
+                time.sleep(self.rssi_delay)
+                continue 
 
             log.debug("{0} RSSI: {1}".format(self.device.name, rssi))
 
@@ -304,7 +307,17 @@ class TrackingThread:
                 sample_num = (sample_num + 1) % self.num_rssi_samples
                 rssi = sum(rssi_samples) / self.num_rssi_samples
 
+                # Ignore readings with large delta
+                last_reading = rssi_samples[sample_num-1]
+                delta = abs(rssi - last_reading)
+
+                if abs(delta > self.max_delta):
+                    log.debug("Delta too large. Skipping.")
+                    time.sleep(self.rssi_delay)
+                    continue
+
             log.debug('{0} RSSI: {1}'.format(self.device.name, rssi))
+            
             # Publish to HASS
             self.hass_client.publish(self.mqtt_client_topic, rssi)
             time.sleep(self.rssi_delay)
