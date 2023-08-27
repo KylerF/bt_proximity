@@ -203,7 +203,7 @@ class DeviceRegistry:
         for mac in self.known_devices:
             device = self.known_devices[mac]
             device_yaml = {
-                device.device_id: {
+                device.id: {
                     'mac': device.mac, 
                     'name': device.name, 
                     'track': device.track
@@ -450,27 +450,17 @@ def main():
             log.info('Adding new device: {0} {1}'.format(mac, name))
             device_id = name.lower().replace("'", "").replace(" ", "_")
             
-            new_device = {
-                device_id: {
-                    'mac': mac, 
-                    'name': name, 
-                    'track': False
-                }
-            }
-            
-            known_devices.update(new_device)
-            devices_file = open('known_devices.yaml', 'w')
-            yaml.dump(known_devices, devices_file, default_flow_style=False)
-            devices_file.close()
+            new_device = Device(device_id, mac, name, track=False)
+            device_registry.register(new_device)
 
-            client_topic = '{0}/{1}/{2}'.format(topic_prefix, client_id, device_id)
+            #client_topic = '{0}/{1}/{2}'.format(topic_prefix, client_id, device_id)
  
-            args = (client, client_topic, mac, num_rssi_samples, rssi_delay)
-            macs.append(mac)
+            #args = (client, client_topic, mac, num_rssi_samples, rssi_delay)
+            #macs.append(mac)
 
             # Kick off a new thread
-            tracking_thread = threading.Thread(target=publish_rssi, args=args)
-            tracking_thread.start()
+            #tracking_thread = threading.Thread(target=publish_rssi, args=args)
+            #tracking_thread.start()
 
         time.sleep(scan_delay)
 

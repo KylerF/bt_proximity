@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 User=pi
 WorkingDirectory=/home/pi/bt_proximity
-ExecStart=/usr/bin/python2.7 /home/pi/bt_proximity/publish_rssi.py
+ExecStart=/usr/bin/python3 /home/pi/bt_proximity/publish_rssi.py
 Restart=always
 RestartSec=3
 
