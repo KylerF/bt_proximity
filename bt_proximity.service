@@ -2,11 +2,13 @@
 Description=Bluetooth Proximity Tracking
 After=network-online.target
 Wants=network-online.target
+PartOf=bluetooth.service
 
 [Service]
 User=pi
 WorkingDirectory=/home/pi/bt_proximity
 ExecStart=/usr/bin/python3 /home/pi/bt_proximity/publish_rssi.py
+ExecStartPre=/bin/sleep 30
 Restart=always
 RestartSec=3
 
